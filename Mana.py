@@ -227,3 +227,15 @@ yourAdditionalTPS = yourAdditionalBlocksPerEpoch/epochDuration
 
 print(yourTPS)
 print(yourAdditionalTPS)
+
+yourTotalTps = yourTPS + yourAdditionalTPS
+timeToGetEnoughManaInSeconds = 1/yourTotalTps
+timeToGetEnoughManaInMinutes = timeToGetEnoughManaInSeconds/60
+timeToGetEnoughManaInHours = timeToGetEnoughManaInMinutes/60
+
+timeToGetEnoughManaInSecondsHolder = 1/yourTPS
+timeToGetEnoughManaInMinutesHolder = timeToGetEnoughManaInSecondsHolder/60
+timeToGetEnoughManaInHoursHolder = timeToGetEnoughManaInMinutesHolder/60
+
+print(timeToGetEnoughManaInHours)
+print(timeToGetEnoughManaInHoursHolder)
