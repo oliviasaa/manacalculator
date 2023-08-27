@@ -239,3 +239,69 @@ timeToGetEnoughManaInHoursHolder = timeToGetEnoughManaInMinutesHolder/60
 
 print(timeToGetEnoughManaInHours)
 print(timeToGetEnoughManaInHoursHolder)
+
+
+
+
+################################################################################
+##                                                                            ##
+##                          MANA ACCUMULATION TAB                             ##
+##                  (uses the same variables as the tps tab)                  ##
+##  (it's the same code as the tps tab, except lines 174, 177, 186, and 188)  ##
+##                                                                            ##
+################################################################################
+
+epochDiff = finalEpoch - initialEpoch
+totalTargetReward = sum([targetReward(initialEpoch + i) for i in range(epochDiff)])
+#print([targetReward(initialEpoch + i) for i in range(epochDiff)])
+#print(initialEpoch, finalEpoch)
+
+# Calculates the total rewards for each pool, already discounting the validator fixed cost
+poolRewards = [0 for i in range(len(lockedStake))]
+if totalStake > 0:
+    if totalValidatorsStake > 0:
+        for i in range(len(lockedStake)):
+            poolRewards[i] = ((lockedStake[i]+delegatedStake[i])/totalStake + lockedStake[i]/totalValidatorsStake) * totalTargetReward * performance[i]/2.0 - epochDiff*fixedCosts[i]
+    else:                
+        for i in range(len(lockedStake)):
+            poolRewards[i] = ((lockedStake[i]+delegatedStake[i])/totalStake) * totalTargetReward * performance[i]/2.0 - epochDiff*fixedCosts[i]
+
+# Calculates the rewards for each validator 
+validatorRewards = [0 for i in range(len(lockedStake))]
+for i in range(len(lockedStake)):
+    if poolRewards[i] < 0:
+        validatorRewards[i] = 0
+        poolRewards[i] = 0
+    elif poolRewards[i] == 0:
+        validatorRewards[i] = epochDiff*fixedCosts[i]
+    else:
+        validatorRewards[i] = epochDiff*fixedCosts[i] + poolRewards[i]*profitMargin + (1-profitMargin)*poolRewards[i]*lockedStake[i]/(delegatedStake[i]+lockedStake[i])
+
+delegatorRewards = [0 for i in range(len(lockedStake))]
+for i in range(len(lockedStake)):
+    if poolRewards[i] > 0:
+        delegatorRewards[i] = poolRewards[i]*(1-profitMargin)*delegatedStake[i]/(delegatedStake[i]+lockedStake[i])
+
+if yourRole == "Delegator":
+    if delegatorRewards[yourPool] > 0:
+        yourRewards = delegatorRewards[yourPool]*yourTokens/delegatedStake[yourPool]
+    else:
+        yourRewards = 0
+
+if yourRole == "Validator":
+    yourRewards = validatorRewards[-1]
+
+yourPassiveRewards = potential_Mana(yourTokens, first_slot_of_epoch(initialEpoch)-1, first_slot_of_epoch(finalEpoch)-1, generationPerSlot)
+yourManaAccumulated = yourPassiveRewards + yourRewards
+
+
+if congestionLevel == "Low": 
+    RMC = RMCLowCongestion
+elif congestionLevel == "Stable": 
+    RMC = RMCStableCongestion
+else:
+    RMC = RMCExtremeCongestion
+
+yourBlocksAccumulated = yourManaAccumulated/RMC
+
+print(yourRewards, yourPassiveRewards, yourManaAccumulated, yourBlocksAccumulated)
