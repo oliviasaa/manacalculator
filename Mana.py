@@ -252,7 +252,7 @@ print(timeToGetEnoughManaInHoursHolder)
 ################################################################################
 
 epochDiff = finalEpoch - initialEpoch
-totalTargetReward = sum([targetReward(initialEpoch + i) for i in range(epochDiff)])
+totalTargetReward = sum([decay(targetReward(initialEpoch + i),epochDiff-i) for i in range(epochDiff)])
 #print([targetReward(initialEpoch + i) for i in range(epochDiff)])
 #print(initialEpoch, finalEpoch)
 
